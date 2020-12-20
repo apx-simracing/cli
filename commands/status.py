@@ -34,7 +34,7 @@ def get_drivers_command(env, *args, **kwargs):
                     "vehicle": v["vehicleName"],
                     "penalties": v["penalties"],
                     "pitstops": v["pitstops"],
-                    "lapDistannce": v["lapDistance"],
+                    "lapDistance": v["lapDistance"],
                     "vehicleClass": v["carClass"],
                     "steamID": v["steamID"] if v["steamID"] != 0 else None
                 }, vehicles))
