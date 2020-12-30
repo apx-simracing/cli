@@ -35,43 +35,12 @@
         },
         "Miscellaneous": {
           "WebUI port": 5398
+        },
+        "Race Conditions": {
+          "MULTI Weather": 5,
+          "GPRIX Weather": 5
         }
       }
-    }
-  },
-  "session": {
-    "drivers": 20,
-    "grip": {
-      "Practice": {
-        "grip_mode": "Green",
-        "grip_scale": "5x"
-      }
-    },
-    "options": {
-      "Flag Rules:ComboBox": [
-        "None"
-      ],
-      "Fuel Usage:ComboBox": [
-        "Normal"
-      ],
-      "Practise Time:ComboBox": [
-        "90 minutes"
-      ],
-      "Race Name:Edit": "APX GT3@Portland",
-      "Race Time Scale:ComboBox": [
-        "Normal"
-      ],
-      "Type of Start:ComboBox": [
-        "Standing"
-      ],
-      "Race Length:ComboBox": [
-        "Time"
-      ],
-      "Race Laps:Edit": "",
-      "Race Time:Edit": "0:30:00",
-      "Qualify Time:ComboBox": [
-        "15 minutes"
-      ]
     }
   },
   "cars": {
@@ -108,5 +77,13 @@
     "name": "apx_gt3_portland",
     "version": "1.0",
     "rfm": "default.rfm"
+  },
+  "conditions": {
+    "weather": "./configs/weather/rain.wet",
+    "conditionsRoot": "Autopolis",
+    "weatherTarget": "AUTOPOLISs.wet",
+    "grip": {
+      "RealRoadP1": "configs/weather/AutoSave.rrbin"
+    }
   }
 }

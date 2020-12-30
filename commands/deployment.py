@@ -5,6 +5,11 @@ from commands import http_api_helper
 
 
 def deploy_command(env, *args, **kwargs) -> bool:
+    server_key = env["server"]
+    server_data = env["server_data"][server_key]
+    url = server_data["url"]
+    secret = server_data["secret"]
+
     is_running_command, running_text = http_api_helper(env, "status", {}, get)
     if not is_running_command:
         raise Exception("Status check failed")
@@ -15,12 +20,29 @@ def deploy_command(env, *args, **kwargs) -> bool:
     file_name = args[0][0]
     rfm_filename = args[0][1]
     result = False
+
+    upload_files = {}
     with open(file_name, "r") as file:
         data = file.read()
-        deploy_result, text = http_api_helper(env, "deploy", {"config": data,
-                                                              "rfm_config": open(rfm_filename, "r").read()})
-        print(text)
-        result = deploy_result
+        # add weather and grip, if possible
+        json_data = loads(data)
+        if "conditions" in json_data:
+            if "weather" in json_data["conditions"]:
+                weather_filename = json_data["conditions"]["weather"]
+                upload_files['weather'] = open(weather_filename, "r").read()
+                if "grip" in json_data["conditions"]:
+                    grip = {}
+                    for grip_session, grip_filename in json_data["conditions"]["grip"].items():
+                        upload_files[grip_session] = open(
+                            grip_filename, "rb").read()
+
+        got = post(
+            url + "/deploy", headers={"authorization": secret},
+            data={"config": data, "rfm_config": open(
+                rfm_filename, "r").read()},
+            files=upload_files)
+
+        result = got.status_code == 200
     return result
 
 
