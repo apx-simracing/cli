@@ -46,6 +46,8 @@ def get_final_filename(needle: str, short_name: str, number: str) -> str:
         final_name = f"{short_name}_{number}-icon-1024x576.png"
     elif "-icon-2048x1152" in needle:
         final_name = f"{short_name}_{number}-icon-2048x1152.png"
+    elif ".json" in needle:
+        final_name = f"{short_name}_{number}.json"
     return final_name
 
 
@@ -57,17 +59,14 @@ def build_skin_command(env, *args, **kwargs):
         server_data = env["server_data"][server_key]
         url = server_data["url"]
         secret = server_data["secret"]
-        file_name = env["server_config"]
+        file_name = args[0][0]
         if not exists(file_name):
             print("file not existing")
         else:
 
             # read templates
             build_path = server_data["env"]["build_path"]
-            out_path = server_data["env"]["out_path"]
             packs_path = server_data["env"]["packs_path"]
-            rmtree(out_path)
-            mkdir(out_path)
 
             templates = {}
             for file in listdir("configs/templates"):
@@ -122,8 +121,11 @@ def build_skin_command(env, *args, **kwargs):
                                         needle, short_name, number)
                                     had_custom_file = True
                                     tar.add(path, final_name)
+                                    print(f"Adding {final_name} to archive")
 
                                 if had_custom_file:
+                                    print(
+                                        f"Adding generated {info.name} to archive")
                                     tar.addfile(
                                         info, io.BytesIO(tar_template))
 
