@@ -24,11 +24,6 @@ from commands.build import (
     get_ports_command,
     stamp_command,
 )
-from commands.results import (
-    get_results_command,
-    process_results_command,
-    update_results_command,
-)
 from commands.util import (
     get_rfcmp_info_command,
     get_components_in_directory_command,
@@ -51,8 +46,6 @@ SHELL_COMMANDS = {
     "list": list_command,
     "drivers": get_drivers_command,
     "build_skins": build_skin_command,
-    "results": get_results_command,
-    "processresults": process_results_command,
     "config": get_config_command,
     "ports": get_ports_command,
     "install": install_command,
@@ -61,7 +54,6 @@ SHELL_COMMANDS = {
     "rfcmpinfo": get_rfcmp_info_command,
     "rfcmpdir": get_components_in_directory_command,
     "checkconfig": check_config_command,
-    "updateresults": update_results_command,
     "stamp": stamp_command,
 }
 
