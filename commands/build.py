@@ -67,10 +67,11 @@ def build_skin_command(env, *args, **kwargs):
             # read templates
             build_path = server_data["env"]["build_path"]
             packs_path = server_data["env"]["packs_path"]
+            templates_path = server_data["env"]["templates_path"]
 
             templates = {}
-            for file in listdir("configs/templates"):
-                with open(join("configs/templates", file)) as file_handle:
+            for file in listdir(templates_path):
+                with open(join(templates_path, file)) as file_handle:
                     templates[file.replace(".veh", "")] = file_handle.read()
             with open(file_name, "r") as file:
                 data = load(file)
@@ -81,15 +82,14 @@ def build_skin_command(env, *args, **kwargs):
                     entries = vehicle["entries"]
                     is_update = vehicle["component"]["update"]
                     if is_update:
-                        all_files_in_build = listdir(
-                            join(build_path, mod_name))
-                        output_filename = join(
-                            packs_path, f"server_{mod_name}.tar.gz")
+                        all_files_in_build = listdir(join(build_path, mod_name))
+                        output_filename = join(packs_path, f"server_{mod_name}.tar.gz")
                         with tarfile.open(output_filename, "w:gz") as tar:
                             for raw_file in all_files_in_build:
                                 if ".ini" in raw_file:
                                     tar.add(
-                                        join(build_path, mod_name, raw_file), raw_file)
+                                        join(build_path, mod_name, raw_file), raw_file
+                                    )
                                     print(f"Adding {raw_file} to archive")
                             for entry in entries:
                                 match = re.match(team_pattern, entry)
@@ -98,11 +98,11 @@ def build_skin_command(env, *args, **kwargs):
                                 description = entry
                                 # Parse the VEH file
                                 raw_template = templates[mod_name]
-                                parsed_template = eval(
-                                    f'f"""{raw_template}\n"""')
+                                parsed_template = eval(f'f"""{raw_template}\n"""')
                                 tar_template = parsed_template.encode("utf8")
                                 info = tarfile.TarInfo(
-                                    name=f"{short_name}_{number}.veh")
+                                    name=f"{short_name}_{number}.veh"
+                                )
                                 info.size = len(tar_template)
 
                                 file_pattern = r"([^\d]|_)" + number + "[^\d]"
@@ -110,35 +110,47 @@ def build_skin_command(env, *args, **kwargs):
                                 skin_files = []
                                 had_custom_file = False
                                 for build_file in all_files_in_build:
-                                    if re.search(file_pattern, build_file) is not None and ".veh" not in build_file:
+                                    if (
+                                        re.search(file_pattern, build_file) is not None
+                                        and ".veh" not in build_file
+                                    ):
                                         skin_files.append(build_file)
                                 for skin_file in skin_files:
-                                    path = join(
-                                        join(build_path, mod_name), skin_file)
+                                    path = join(join(build_path, mod_name), skin_file)
                                     needle = skin_file.lower()
                                     final_name = skin_file
                                     final_name = get_final_filename(
-                                        needle, short_name, number)
+                                        needle, short_name, number
+                                    )
                                     had_custom_file = True
                                     tar.add(path, final_name)
                                     print(f"Adding {final_name} to archive")
 
                                 if had_custom_file:
-                                    print(
-                                        f"Adding generated {info.name} to archive")
-                                    tar.addfile(
-                                        info, io.BytesIO(tar_template))
+                                    print(f"Adding generated {info.name} to archive")
+                                    tar.addfile(info, io.BytesIO(tar_template))
 
-                        got = post(url + "/skins", headers={"authorization": secret}, files={
-                            'skins': open(output_filename, 'rb')}, data={"target_path": mod_name})
+                        got = post(
+                            url + "/skins",
+                            headers={"authorization": secret},
+                            files={"skins": open(output_filename, "rb")},
+                            data={"target_path": mod_name},
+                        )
                 return True
 
 
-def add_numberplates(numberplates: dict, skin_file: str, region_file: str, skin_output_file: str, region_output_file: str, text=None):
+def add_numberplates(
+    numberplates: dict,
+    skin_file: str,
+    region_file: str,
+    skin_output_file: str,
+    region_output_file: str,
+    text=None,
+):
     livery = image.Image(filename=skin_file)
     region = image.Image(filename=region_file)
-    livery.compression = 'dxt5'
-    region.compression = 'dxt5'
+    livery.compression = "dxt5"
+    region.compression = "dxt5"
     for numberplate in numberplates:
         x = numberplate["x"]
         y = numberplate["y"]
@@ -151,8 +163,7 @@ def add_numberplates(numberplates: dict, skin_file: str, region_file: str, skin_
             numberplate_img.rotate(rotate)
             livery.composite(numberplate_img, left=x, top=y)
         if "text" in numberplate:
-            transparency_img = image.Image(
-                filename=numberplate["transparency"])
+            transparency_img = image.Image(filename=numberplate["transparency"])
             with Drawing() as draw:
                 draw.fill_color = Color("#c8c8c8")
                 draw.font_size = numberplate["size"]
@@ -189,18 +200,34 @@ def stamp_command(env, *args, **kwargs):
             vehicle_name = vehicle["component"]["name"]
             if vehicle["component"]["update"]:
                 entries = vehicle["entries"]
-                numberplates = [] if "numberplates" not in vehicle["component"] else vehicle["component"]["numberplates"]
+                numberplates = (
+                    []
+                    if "numberplates" not in vehicle["component"]
+                    else vehicle["component"]["numberplates"]
+                )
                 for entry in entries:
                     match = re.match(team_pattern, entry)
                     name = match.group("name").strip()
                     number = match.group("number").strip()
                     skin_path = join(
-                        build_path, vehicle_name, short_name + "_" + str(number) + ".dds")
+                        build_path,
+                        vehicle_name,
+                        short_name + "_" + str(number) + ".dds",
+                    )
                     region_path = join(
-                        build_path, vehicle_name, short_name + "_" + str(number) + "_Region.dds")
+                        build_path,
+                        vehicle_name,
+                        short_name + "_" + str(number) + "_Region.dds",
+                    )
                     if exists(skin_path) and exists(region_path):
                         add_numberplates(
-                            numberplates, skin_path, region_path, skin_path, region_path, number)
+                            numberplates,
+                            skin_path,
+                            region_path,
+                            skin_path,
+                            region_path,
+                            number,
+                        )
     return True
 
 
@@ -218,21 +245,12 @@ def get_config_command(env, *args, **kwargs) -> bool:
 
 def get_ports_command(env, *args, **kwargs) -> bool:
     got = query_config(env, args, kwargs)
-    simulation_port = int(
-        got["Multiplayer General Options"]["Simulation Port"])
+    simulation_port = int(got["Multiplayer General Options"]["Simulation Port"])
     http_port = int(got["Multiplayer General Options"]["HTTP Server Port"])
     reciever_port = int(got["reciever"]["port"])
     ports = {
-        "TCP": [
-            simulation_port,
-            http_port,
-            reciever_port
-        ],
-        "UDP": [
-            simulation_port,
-            http_port + 1,
-            http_port + 2
-        ]
+        "TCP": [simulation_port, http_port, reciever_port],
+        "UDP": [simulation_port, http_port + 1, http_port + 2],
     }
     print(ports)
     return True
