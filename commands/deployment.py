@@ -92,3 +92,18 @@ def get_lockfile_command(env, *args, **kwargs):
         with open(target_file, "wb") as f:
             f.write(got.content)
         return True
+
+
+def get_log_command(env, *args, **kwargs):
+    if not env["server"]:
+        print("no server set")
+    else:
+        server_key = env["server"]
+        server_data = env["server_data"][server_key]
+        url = server_data["url"]
+        secret = server_data["secret"]
+        target_file = args[0][0]
+        got = get(url + "/log", headers={"authorization": secret})
+        with open(target_file, "wb") as f:
+            f.write(got.content)
+        return True

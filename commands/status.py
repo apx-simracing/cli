@@ -15,9 +15,14 @@ def background_status(env):
     server_data = env["server_data"][server_key]
     url = server_data["url"]
     secret = server_data["secret"]
-    got = get(url + "/status", headers={"authorization": secret,
-                                        "content-type": "application/x-www-form-urlencoded"})
-    return got.json()
+    got = get(
+        url + "/status",
+        headers={
+            "authorization": secret,
+            "content-type": "application/x-www-form-urlencoded",
+        },
+    )
+    return got.text
 
 
 def get_drivers_command(env, *args, **kwargs):
@@ -29,15 +34,19 @@ def get_drivers_command(env, *args, **kwargs):
             vehicles = got["vehicles"]
 
             mapped_vehicles = list(
-                map(lambda v: {
-                    "driver": v["driverName"],
-                    "vehicle": v["vehicleName"],
-                    "penalties": v["penalties"],
-                    "pitstops": v["pitstops"],
-                    "lapDistance": v["lapDistance"],
-                    "vehicleClass": v["carClass"],
-                    "steamID": v["steamID"] if v["steamID"] != 0 else None
-                }, vehicles))
+                map(
+                    lambda v: {
+                        "driver": v["driverName"],
+                        "vehicle": v["vehicleName"],
+                        "penalties": v["penalties"],
+                        "pitstops": v["pitstops"],
+                        "lapDistance": v["lapDistance"],
+                        "vehicleClass": v["carClass"],
+                        "steamID": v["steamID"] if v["steamID"] != 0 else None,
+                    },
+                    vehicles,
+                )
+            )
             print(mapped_vehicles)
         else:
             return False

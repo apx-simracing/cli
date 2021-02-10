@@ -17,6 +17,7 @@ from commands.deployment import (
     install_command,
     unlock_command,
     get_lockfile_command,
+    get_log_command,
 )
 from commands.build import (
     build_skin_command,
@@ -51,6 +52,7 @@ SHELL_COMMANDS = {
     "install": install_command,
     "unlock": unlock_command,
     "lockfile": get_lockfile_command,
+    "log": get_log_command,
     "rfcmpinfo": get_rfcmp_info_command,
     "rfcmpdir": get_components_in_directory_command,
     "checkconfig": check_config_command,
