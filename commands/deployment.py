@@ -25,7 +25,7 @@ def deploy_command(env, *args, **kwargs) -> bool:
         data = file.read()
         # add grip, if possible
         json_data = loads(data)
-        if "conditions" in json_data:
+        if "conditions" in json_data and json_data["conditions"] is not None:
             for session_key, gripfile in json_data["conditions"].items():
                 upload_files[session_key] = open(gripfile, "rb").read()
 
