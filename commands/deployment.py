@@ -20,22 +20,14 @@ def deploy_command(env, *args, **kwargs) -> bool:
     file_name = args[0][0]
     rfm_filename = args[0][1]
     result = False
-
     upload_files = {}
     with open(file_name, "r") as file:
         data = file.read()
-        # add weather and grip, if possible
+        # add grip, if possible
         json_data = loads(data)
         if "conditions" in json_data:
-            if "weather" in json_data["conditions"]:
-                weather_filename = json_data["conditions"]["weather"]
-                upload_files["weather"] = open(weather_filename, "r").read()
-                if "grip" in json_data["conditions"]:
-                    grip = {}
-                    for grip_session, grip_filename in json_data["conditions"][
-                        "grip"
-                    ].items():
-                        upload_files[grip_session] = open(grip_filename, "rb").read()
+            for session_key, gripfile in json_data["conditions"].items():
+                upload_files[session_key] = open(gripfile, "rb").read()
 
         got = post(
             url + "/deploy",
