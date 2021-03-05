@@ -71,8 +71,9 @@ def build_skin_command(env, *args, **kwargs):
 
             templates = {}
             for file in listdir(templates_path):
-                with open(join(templates_path, file)) as file_handle:
-                    templates[file.replace(".veh", "")] = file_handle.read()
+                if file.endswith(".veh"):
+                    with open(join(templates_path, file)) as file_handle:
+                        templates[file.replace(".veh", "")] = file_handle.read()
             with open(file_name, "r") as file:
                 data = load(file)
                 veh_mods = data["cars"]
