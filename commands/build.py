@@ -11,7 +11,7 @@ from wand import image
 from wand.drawing import Drawing
 from wand.color import Color
 
-team_pattern = r"(?P<name>.+)\s?#(?P<number>\d+)"
+team_pattern = r"(?P<name>.+)\s?#(?P<number>\d+)\:(?P<pitgroup>\d+)"
 
 
 def get_final_filename(needle: str, short_name: str, number: str) -> str:
@@ -97,6 +97,7 @@ def build_skin_command(env, *args, **kwargs):
                                 name = match.group("name").strip()
                                 number = match.group("number").strip()
                                 description = entry
+                                pitgroup = match.group("pitgroup").strip()
                                 # Parse the VEH file
                                 raw_template = templates[mod_name]
                                 parsed_template = eval(f'f"""{raw_template}\n"""')
