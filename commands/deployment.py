@@ -27,7 +27,8 @@ def deploy_command(env, *args, **kwargs) -> bool:
         json_data = loads(data)
         if "conditions" in json_data and json_data["conditions"] is not None:
             for session_key, gripfile in json_data["conditions"].items():
-                upload_files[session_key] = open(gripfile, "rb").read()
+                if gripfile is not None:
+                    upload_files[session_key] = open(gripfile, "rb").read()
 
         got = post(
             url + "/deploy",
