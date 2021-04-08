@@ -96,7 +96,7 @@ def build_skin_command(env, *args, **kwargs):
                                 match = re.match(team_pattern, entry)
                                 name = match.group("name").strip()
                                 number = match.group("number").strip()
-                                description = entry
+                                description = entry.split(":")[0]
                                 pitgroup = match.group("pitgroup").strip()
                                 # Parse the VEH file
                                 raw_template = templates[mod_name]
