@@ -101,6 +101,54 @@ def build_skin_command(env, *args, **kwargs):
                                 # Parse the VEH file
                                 raw_template = templates[mod_name]
                                 parsed_template = eval(f'f"""{raw_template}\n"""')
+                                # add entry overwrites, if existing
+                                overwrites = (
+                                    vehicle["entries_overwrites"][number]
+                                    if number in vehicle["entries_overwrites"]
+                                    else None
+                                )
+                                if overwrites:
+                                    print(
+                                        "Found overwrites for VEH template for entry {}".format(
+                                            number
+                                        )
+                                    )
+                                    template_lines = parsed_template.split("\n")
+                                    template_lines_with_overwrites = []
+                                    for line in template_lines:
+                                        line_to_add = None
+                                        for key, value in overwrites.items():
+                                            pattern = (
+                                                r"("
+                                                + key
+                                                + '\s{0,}=\s{0,}"?([^"^\n^\r]+)"?)'
+                                            )
+                                            matches = re.match(pattern, line)
+                                            use_quotes = '"' in line
+                                            if matches:
+                                                line_to_add = "{}={}\n".format(
+                                                    key,
+                                                    value
+                                                    if not use_quotes
+                                                    else '"{}"'.format(value),
+                                                )
+                                                print(
+                                                    "Using value {} (in quotes: {}) for key {} of entry {}".format(
+                                                        value, use_quotes, key, number
+                                                    )
+                                                )
+                                                break
+                                        if line_to_add:
+                                            template_lines_with_overwrites.append(
+                                                line_to_add
+                                            )
+                                        else:
+                                            template_lines_with_overwrites.append(
+                                                line + "\n"
+                                            )
+                                    parsed_template = "".join(
+                                        template_lines_with_overwrites
+                                    )
                                 tar_template = parsed_template.encode("utf8")
                                 info = tarfile.TarInfo(
                                     name=f"{short_name}_{number}.veh"
