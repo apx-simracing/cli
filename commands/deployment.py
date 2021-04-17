@@ -1,5 +1,5 @@
 from requests import post, get
-from os.path import exists
+from os.path import exists, basename
 from json import loads
 from commands import http_api_helper
 
@@ -68,6 +68,27 @@ def unlock_command(env, *args, **kwargs):
             url + "/unlock",
             headers={"authorization": secret},
             files={"unlock": open(file, "rb")},
+        )
+        return True
+
+
+def install_plugins_command(env, *args, **kwargs):
+    if not env["server"]:
+        print("no server set")
+    else:
+        server_key = env["server"]
+        server_data = env["server_data"][server_key]
+        url = server_data["url"]
+        secret = server_data["secret"]
+        file = args[0][0]
+        files = {}
+        for index, arg in enumerate(args[0]):
+            base_name = basename(arg)
+            files[base_name] = open(arg, "rb")
+        got = post(
+            url + "/plugins",
+            headers={"authorization": secret},
+            files=files,
         )
         return True
 
