@@ -10,12 +10,19 @@ def http_api_helper(env: dict, route: str, data: dict, method=post) -> Union[boo
     secret = env["server_data"][env["server"]]["secret"]
     url = env["server_data"][env["server"]]["url"]
     try:
-        got = method(url + f"/{route}", headers={"authorization": secret,
-                                                 "content-type": "application/x-www-form-urlencoded"}, data=data)
+        got = method(
+            url + f"/{route}",
+            headers={
+                "authorization": secret,
+                "content-type": "application/x-www-form-urlencoded",
+            },
+            data=data,
+        )
 
         result_ok = got.status_code == 200
         result_text = got.text
     except Exception as err:
+        print(result_text)
         result_ok = False
         result_text = str(err)
 

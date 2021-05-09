@@ -7,9 +7,6 @@ from shutil import copyfile, rmtree
 import tarfile
 from commands import http_api_helper
 import io
-from wand import image
-from wand.drawing import Drawing
-from wand.color import Color
 
 team_pattern = r"(?P<name>.+)\s?#(?P<number>\d+)\:(?P<pitgroup>\d+)"
 
@@ -187,98 +184,6 @@ def build_skin_command(env, *args, **kwargs):
                             data={"target_path": mod_name},
                         )
                 return True
-
-
-def add_numberplates(
-    numberplates: dict,
-    skin_file: str,
-    region_file: str,
-    skin_output_file: str,
-    region_output_file: str,
-    text=None,
-):
-    livery = image.Image(filename=skin_file)
-    region = image.Image(filename=region_file)
-    livery.compression = "dxt5"
-    region.compression = "dxt5"
-    for numberplate in numberplates:
-        x = numberplate["x"]
-        y = numberplate["y"]
-        rotate = numberplate["rotate"]
-        if "file" in numberplate:
-            width = numberplate["width"]
-            height = numberplate["height"]
-            numberplate_img = image.Image(filename=numberplate["file"])
-            numberplate_img.resize(width, height)
-            numberplate_img.rotate(rotate)
-            livery.composite(numberplate_img, left=x, top=y)
-        if "text" in numberplate:
-            transparency_img = image.Image(filename=numberplate["transparency"])
-            with Drawing() as draw:
-                draw.fill_color = Color("#c8c8c8")
-                draw.font_size = numberplate["size"]
-                draw.color = Color("#c8c8c8")
-                draw.text(x, y, numberplate["text"] if text is None else text)
-                draw(transparency_img)
-                transparency_img.rotate(rotate)
-                livery.composite(transparency_img, left=0, top=0)
-
-    livery.save(filename=skin_output_file)
-
-    for numberplate in numberplates:
-        x = numberplate["x"]
-        y = numberplate["y"]
-        rotate = numberplate["rotate"]
-        if "region" in numberplate:
-            width = numberplate["width"]
-            height = numberplate["height"]
-            region_file = numberplate["region"]
-            region_img_stamp = image.Image(filename=region_file)
-            region.composite(region_img_stamp, left=x, top=y)
-    region.save(filename=region_output_file)
-
-
-def stamp_command(env, *args, **kwargs):
-    config_path = env["server_config"]
-    server_key = env["server"]
-    server_data = env["server_data"][server_key]
-    build_path = server_data["env"]["build_path"]
-    with open(config_path, "r") as file:
-        config = loads(file.read())
-        for workshop_id, vehicle in config["cars"].items():
-            short_name = vehicle["component"]["short"]
-            vehicle_name = vehicle["component"]["name"]
-            if vehicle["component"]["update"]:
-                entries = vehicle["entries"]
-                numberplates = (
-                    []
-                    if "numberplates" not in vehicle["component"]
-                    else vehicle["component"]["numberplates"]
-                )
-                for entry in entries:
-                    match = re.match(team_pattern, entry)
-                    name = match.group("name").strip()
-                    number = match.group("number").strip()
-                    skin_path = join(
-                        build_path,
-                        vehicle_name,
-                        short_name + "_" + str(number) + ".dds",
-                    )
-                    region_path = join(
-                        build_path,
-                        vehicle_name,
-                        short_name + "_" + str(number) + "_Region.dds",
-                    )
-                    if exists(skin_path) and exists(region_path):
-                        add_numberplates(
-                            numberplates,
-                            skin_path,
-                            region_path,
-                            skin_path,
-                            region_path,
-                            number,
-                        )
-    return True
 
 
 def query_config(env, *args, **kwargs):

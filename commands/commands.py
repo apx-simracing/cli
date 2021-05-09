@@ -20,12 +20,7 @@ from commands.deployment import (
     get_log_command,
     install_plugins_command,
 )
-from commands.build import (
-    build_skin_command,
-    get_config_command,
-    get_ports_command,
-    stamp_command,
-)
+from commands.build import build_skin_command, get_config_command, get_ports_command
 from commands.util import (
     get_rfcmp_info_command,
     get_components_in_directory_command,
@@ -57,7 +52,6 @@ SHELL_COMMANDS = {
     "rfcmpinfo": get_rfcmp_info_command,
     "rfcmpdir": get_components_in_directory_command,
     "checkconfig": check_config_command,
-    "stamp": stamp_command,
     "plugins": install_plugins_command,
 }
 
