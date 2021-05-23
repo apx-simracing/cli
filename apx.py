@@ -26,7 +26,7 @@ for server in parsed_args.server:
     if config is not None:
         env["server_config"] = config
     if parsed_args.cmd not in SHELL_COMMANDS:
-        raise Exception(f"command {args.cmd} not found")
+        raise Exception(f"command {parsed_args.cmd} not found")
     result = SHELL_COMMANDS[parsed_args.cmd](env, parsed_args.args)
     if not result:
         raise CommandFailedException()
