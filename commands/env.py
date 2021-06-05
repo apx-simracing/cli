@@ -8,11 +8,11 @@ def oneclick_start_command(env, *args, **kwargs) -> bool:
     if not is_running_command:
         raise Exception("Status check failed")
     status_json = loads(running_text)
-    if "not_running" not in status_json:
+    if status_json and "not_running" not in status_json:
         raise Exception("Server already running")
 
     got, text = http_api_helper(env, "oneclick_start_server", {}, get)
-    print(got)
+    print(text)
     return got
 
 

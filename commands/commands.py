@@ -20,6 +20,7 @@ from commands.deployment import (
     get_log_command,
     install_plugins_command,
     get_thumbs_command,
+    weather_update_command,
 )
 from commands.build import build_skin_command, get_config_command, get_ports_command
 from commands.util import (
@@ -55,6 +56,7 @@ SHELL_COMMANDS = {
     "checkconfig": check_config_command,
     "plugins": install_plugins_command,
     "thumbnails": get_thumbs_command,
+    "weatherupdate": weather_update_command,
 }
 
 

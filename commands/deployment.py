@@ -41,6 +41,38 @@ def deploy_command(env, *args, **kwargs) -> bool:
     return result
 
 
+def weather_update_command(env, *args, **kwargs) -> bool:
+    server_key = env["server"]
+    server_data = env["server_data"][server_key]
+    url = server_data["url"]
+    secret = server_data["secret"]
+
+    is_running_command, running_text = http_api_helper(env, "status", {}, get)
+    if not is_running_command:
+        raise Exception("Status check failed")
+
+    status_json = loads(running_text)
+    if status_json and "not_running" not in status_json:
+        raise Exception("Server is running, deploy failed")
+    file_name = args[0][0]
+
+    result = False
+    upload_files = {}
+    with open(file_name, "r") as file:
+        data = file.read()
+        # add grip, if possible
+        json_data = loads(data)
+
+        got = post(
+            url + "/weather",
+            headers={"authorization": secret},
+            data={"config": data},
+        )
+
+        result = got.status_code == 200
+    return result
+
+
 def install_command(env, *args, **kwargs) -> bool:
 
     is_running_command, running_text = http_api_helper(env, "status", {}, get)
