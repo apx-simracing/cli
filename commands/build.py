@@ -48,6 +48,51 @@ def get_final_filename(needle: str, short_name: str, number: str) -> str:
     return final_name
 
 
+def build_track_command(env, *args, **kwargs):
+    if not env["server"]:
+        print("no server set")
+    else:
+        server_key = env["server"]
+        server_data = env["server_data"][server_key]
+        url = server_data["url"]
+        secret = server_data["secret"]
+        args_values = args[0]
+        component = args_values[0]
+        files = args_values[1:]
+
+        tracks_path = server_data["env"]["tracks_path"]
+
+        comp_path = join(tracks_path, component)
+        if not exists(comp_path):
+            raise FileNotFoundError("The component does not exists")
+
+        existing_files = listdir(comp_path)
+
+        attached_files = []
+        for file in files:
+            if file in existing_files:
+                attached_files.append(file)
+
+        if len(files) != len(attached_files):
+            raise Exception("At least one file was not found")
+
+        packs_path = server_data["env"]["packs_path"]
+
+        output_filename = join(packs_path, f"server_{component}.tar.gz")
+        with tarfile.open(output_filename, "w:gz") as tar:
+            for file in attached_files:
+                file_path = join(comp_path, file)
+                tar.add(file_path, file)
+
+        got = post(
+            url + "/skins",
+            headers={"authorization": secret},
+            files={"skins": open(output_filename, "rb")},
+            data={"target_path": component},
+        )
+        return True
+
+
 def build_skin_command(env, *args, **kwargs):
     if not env["server"]:
         print("no server set")

@@ -22,7 +22,12 @@ from commands.deployment import (
     get_thumbs_command,
     weather_update_command,
 )
-from commands.build import build_skin_command, get_config_command, get_ports_command
+from commands.build import (
+    build_skin_command,
+    build_track_command,
+    get_config_command,
+    get_ports_command,
+)
 from commands.util import (
     get_rfcmp_info_command,
     get_components_in_directory_command,
@@ -45,6 +50,7 @@ SHELL_COMMANDS = {
     "list": list_command,
     "drivers": get_drivers_command,
     "build_skins": build_skin_command,
+    "build_track": build_track_command,
     "config": get_config_command,
     "ports": get_ports_command,
     "install": install_command,
