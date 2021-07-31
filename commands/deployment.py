@@ -15,7 +15,7 @@ def deploy_command(env, *args, **kwargs) -> bool:
         raise Exception("Status check failed")
 
     status_json = loads(running_text)
-    if "not_running" not in status_json:
+    if status_json and "not_running" not in status_json:
         raise Exception("Server is running, deploy failed")
     file_name = args[0][0]
     rfm_filename = args[0][1]
