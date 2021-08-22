@@ -8,7 +8,7 @@ import tarfile
 from commands import http_api_helper
 import io
 
-team_pattern = r"(?P<name>.+)\s?#(?P<number>\d+)\:(?P<pitgroup>\d+)"
+team_pattern = r"(?P<name>.+)\s?#(?P<number>.+)\:(?P<pitgroup>\d+)"
 
 
 def get_final_filename(needle: str, short_name: str, number: str) -> str:
