@@ -1,6 +1,6 @@
 from requests import post, get
 from os.path import exists, basename
-from json import loads
+from json import loads, dumps
 from commands import http_api_helper
 
 
@@ -114,12 +114,21 @@ def install_plugins_command(env, *args, **kwargs):
         secret = server_data["secret"]
         file = args[0][0]
         files = {}
+        paths = {}
         for index, arg in enumerate(args[0]):
-            base_name = basename(arg)
-            files[base_name] = open(arg, "rb")
+            if "|" in arg:
+                # the target path is provided
+                parts = arg.split("|") 
+                base_name = basename(parts[0])
+                paths[base_name] = parts[1]
+                files[base_name] = open(parts[0], "rb")
+            else:    
+                base_name = basename(arg)
+                files[base_name] = open(arg, "rb")
         got = post(
             url + "/plugins",
-            headers={"authorization": secret},
+            data={"paths": dumps(paths)},
+            headers={"authorization": secret, "enctype": "multipart/form-data"},
             files=files,
         )
         return True
