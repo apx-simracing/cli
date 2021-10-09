@@ -1,12 +1,13 @@
 from requests import post, get
 from os.path import exists, join
-from os import listdir, mkdir
+from os import listdir, mkdir, unlink
 from json import load, loads
 import re
 from shutil import copyfile, rmtree
 import tarfile
 from commands import http_api_helper
 import io
+import zipfile
 
 team_pattern = r"(?P<name>.+)\s?#(?P<number>.+)\:(?P<pitgroup>\d+)"
 
@@ -125,11 +126,22 @@ def build_skin_command(env, *args, **kwargs):
                     entries = vehicle["entries"]
                     is_update = vehicle["component"]["update"]
                     if is_update:
-                        all_files_in_build = listdir(join(build_path, mod_name))
                         output_filename = join(packs_path, f"server_{mod_name}.tar.gz")
                         with tarfile.open(output_filename, "w:gz") as tar:
+                            for raw_file in listdir(join(build_path, mod_name)):
+                                if ".zip" in raw_file:
+                                    zip_path = join(build_path, mod_name, raw_file)
+                                    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                                        zip_ref.extractall(join(build_path, mod_name))
+                            all_files_in_build = list(filter(lambda x: "zip" not in x, listdir(join(build_path, mod_name))))
+
                             for raw_file in all_files_in_build:
                                 if ".ini" in raw_file:
+                                    tar.add(
+                                        join(build_path, mod_name, raw_file), raw_file
+                                    )
+                                    print(f"Adding {raw_file} to archive")
+                                if ".png" in raw_file:
                                     tar.add(
                                         join(build_path, mod_name, raw_file), raw_file
                                     )
@@ -216,9 +228,6 @@ def build_skin_command(env, *args, **kwargs):
                                     path = join(join(build_path, mod_name), skin_file)
                                     needle = skin_file.lower()
                                     final_name = skin_file
-                                    final_name = get_final_filename(
-                                        needle, short_name, number
-                                    )
                                     had_custom_file = True
                                     tar.add(path, final_name)
                                     print(f"Adding {final_name} to archive")
