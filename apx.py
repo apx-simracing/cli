@@ -1,7 +1,7 @@
 from os.path import isfile
 from json import load
 from os import getcwd
-from sys import path
+from sys import path, argv
 
 path.append(getcwd())
 from args import parser
@@ -29,4 +29,4 @@ for server in parsed_args.server:
         raise Exception(f"command {parsed_args.cmd} not found")
     result = SHELL_COMMANDS[parsed_args.cmd](env, parsed_args.args)
     if not result:
-        raise CommandFailedException()
+        raise Exception(f"Command failed: {argv}")

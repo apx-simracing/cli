@@ -1,6 +1,11 @@
 from requests import post
 
-from commands.env import stop_command, list_command, oneclick_start_command
+from commands.env import (
+    stop_command,
+    list_command,
+    oneclick_start_command,
+    update_command,
+)
 from commands.status import get_status_command, get_drivers_command, get_states_command
 from commands.chat import (
     chat_command,
@@ -45,6 +50,7 @@ SHELL_COMMANDS = {
     "restart": restart_race_command,
     "advance": next_session_command,
     "deploy": deploy_command,
+    "update": update_command,
     "start": oneclick_start_command,
     "stop": stop_command,
     "list": list_command,

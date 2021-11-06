@@ -49,3 +49,16 @@ def list_command(env, *args, **kwargs) -> bool:
         url = value["url"]
         print(f"{key} => {url}")
     return True
+
+
+def update_command(env, *args, **kwargs) -> bool:
+    is_running_command, running_text = http_api_helper(env, "status", {}, get)
+    if not is_running_command:
+        raise Exception("Status check failed")
+    status_json = loads(running_text)
+    if status_json is not None and "not_running" not in status_json:
+        raise Exception("Server is running")
+
+    got, text = http_api_helper(env, "update", {}, get)
+    print(got, text)
+    return got
