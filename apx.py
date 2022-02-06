@@ -1,32 +1,58 @@
-from os.path import isfile
-from json import load
-from os import getcwd
-from sys import path, argv
+import logging
+from os import path
+from sys import argv
 
-path.append(getcwd())
-from args import parser
-from commands.commands import SHELL_COMMANDS, CommandFailedException
 
-SERVER_DATA = []
+if __package__ is None or __package__ == '':
+    from args import parser
+    from helpers import get_servers_data
+    from commands.router import SHELL_COMMANDS
+else:
+    from cli.args import parser
+    from cli.helpers import get_servers_data
+    from cli.commands.router import SHELL_COMMANDS
 
-if not isfile("servers.json"):
-    raise FileNotFoundError("Server config not existing")
 
-with open("servers.json", "r") as read_file:
-    SERVER_DATA = load(read_file)
+ROOT_PATH = path.dirname(path.realpath(__file__))
 
-parsed_args = parser.parse_args()
-if parsed_args.cmd is None:
-    raise Exception("No cmd given")
+logging.basicConfig(filename=path.join(ROOT_PATH, "cli.log"),
+                    encoding='utf-8', level=logging.DEBUG, format='%(asctime)s %(message)s')
 
-for server in parsed_args.server:
-    config = parsed_args.config
-    env = {"server_data": SERVER_DATA, "server": None, "server_config": None}
-    env["server"] = server
-    if config is not None:
-        env["server_config"] = config
-    if parsed_args.cmd not in SHELL_COMMANDS:
-        raise Exception(f"command {parsed_args.cmd} not found")
-    result = SHELL_COMMANDS[parsed_args.cmd](env, parsed_args.args)
-    if not result:
-        raise Exception(f"Command failed: {argv}")
+
+def get_args():
+    parsed_args = parser.parse_args()
+    if parsed_args.cmd is None:
+        logging.error("No cmd given")
+        raise Exception("No cmd given")
+    return parsed_args
+
+
+if __name__ == "__main__":
+
+    server_data = get_servers_data()
+    parsed_args = get_args()
+
+    env_tpl = {"server_data": server_data,
+               "server": None, "server_config": None}
+
+    for server in parsed_args.server:
+        config = parsed_args.config
+
+        env = env_tpl.copy()
+        env["server"] = server
+
+        if config is not None:
+            env["server_config"] = config
+
+        if parsed_args.cmd not in SHELL_COMMANDS:
+            raise Exception(f"command {parsed_args.cmd} not found")
+
+        cli_command = SHELL_COMMANDS[parsed_args.cmd]
+
+        logging.info(
+            f'Running command "{parsed_args.cmd}" env={env} args={parsed_args.args}')
+        result = cli_command(env, parsed_args.args)
+
+        if not result:
+            raise Exception(
+                f"Command failed: {parsed_args.cmd} {argv} result: {result}")
