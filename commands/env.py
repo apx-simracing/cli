@@ -11,7 +11,7 @@ def oneclick_start_command(env, *args, **kwargs) -> bool:
     if not is_running_command:
         raise Exception("Status check failed")
     status_json = loads(running_text)
-    if status_json and "not_running" not in status_json:
+    if status_json["running"] is True:
         raise Exception("Server already running")
 
     got, text = http_api_helper(env, "oneclick_start_server", {}, get)
@@ -24,7 +24,7 @@ def start_command(env, *args, **kwargs) -> bool:
     if not is_running_command:
         raise Exception("Status check failed")
     status_json = loads(running_text)
-    if "not_running" not in status_json:
+    if status_json["running"] is True:
         raise Exception("Server already running")
 
     got, text = http_api_helper(env, "start", {}, get)
@@ -37,7 +37,7 @@ def stop_command(env, *args, **kwargs) -> bool:
     if not is_running_command:
         raise Exception("Status check failed")
     status_json = loads(running_text)
-    if "not_running" in status_json:
+    if status_json["running"] is False:
         raise Exception("Server is not running")
     got, text = http_api_helper(env, "stop", {}, get)
     logger.info(got)
@@ -59,9 +59,9 @@ def update_command(env, *args, **kwargs) -> bool:
     if not is_running_command:
         raise Exception("Status check failed")
     status_json = loads(running_text)
-    if status_json is not None and "not_running" not in status_json:
+    if status_json["running"] is True:
         raise Exception("Server is running")
 
     got, text = http_api_helper(env, "update", {}, get)
-    logger.info(got, text)
+    logger.info(got)
     return got

@@ -6,6 +6,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 def deploy_command(env, *args, **kwargs) -> bool:
     server_key = env["server"]
     server_data = env["server_data"][server_key]
@@ -17,12 +18,12 @@ def deploy_command(env, *args, **kwargs) -> bool:
         raise Exception("Status check failed")
 
     status_json = loads(running_text)
-    if status_json and "not_running" not in status_json:
+    if status_json["running"] is True:
         raise Exception("Server is running, deploy failed")
-    
+
     file_name = args[0][0]
     validate_file_path(file_name)
-    
+
     rfm_filename = args[0][1]
     validate_file_path(rfm_filename)
 
@@ -59,9 +60,9 @@ def weather_update_command(env, *args, **kwargs) -> bool:
         raise Exception("Status check failed")
 
     status_json = loads(running_text)
-    if status_json and "not_running" not in status_json:
+    if status_json["running"] is True:
         raise Exception("Server is running, deploy failed")
-    
+
     file_name = args[0][0]
     validate_file_path(file_name)
 
@@ -90,9 +91,9 @@ def install_command(env, *args, **kwargs) -> bool:
         raise Exception("Status check failed")
 
     status_json = loads(running_text)
-    if "not_running" not in status_json:
+    if status_json["running"] is True:
         raise Exception("Server is running, install failed")
-    
+
     got, text = http_api_helper(env, "install", {}, get)
     logger.info(text)
     return got
@@ -108,7 +109,7 @@ def unlock_command(env, *args, **kwargs):
         secret = server_data["secret"]
         file = args[0][0]
         validate_file_path(file)
-        got = post(
+        post(
             url + "/unlock",
             headers={"authorization": secret},
             files={"unlock": open(file, "rb")},
@@ -130,14 +131,14 @@ def install_plugins_command(env, *args, **kwargs):
         for index, arg in enumerate(args[0]):
             if "|" in arg:
                 # the target path is provided
-                parts = arg.split("|") 
+                parts = arg.split("|")
                 base_name = basename(parts[0])
                 paths[base_name] = parts[1]
                 files[base_name] = open(parts[0], "rb")
-            else:    
+            else:
                 base_name = basename(arg)
                 files[base_name] = open(arg, "rb")
-        got = post(
+        post(
             url + "/plugins",
             data={"paths": dumps(paths)},
             headers={"authorization": secret, "enctype": "multipart/form-data"},
@@ -154,11 +155,11 @@ def get_lockfile_command(env, *args, **kwargs):
         server_data = env["server_data"][server_key]
         url = server_data["url"]
         secret = server_data["secret"]
-        
+
         target_file = args[0][0]
-        
+
         got = get(url + "/lockfile", headers={"authorization": secret})
-        
+
         with open(target_file, "wb") as f:
             f.write(got.content)
         return True
@@ -173,7 +174,7 @@ def get_thumbs_command(env, *args, **kwargs):
         url = server_data["url"]
         secret = server_data["secret"]
         target_file = args[0][0]
-        
+
         got = get(url + "/thumbs", headers={"authorization": secret})
         with open(target_file, "wb") as f:
             f.write(got.content)
